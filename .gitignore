@@ -91,6 +91,7 @@ env.bak/
 venv.bak/
 virtualenv*
 opencvdl/
+*.~lock*
 
 # Spyder project settings
 .spyderproject
