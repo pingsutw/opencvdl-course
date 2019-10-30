@@ -2,7 +2,13 @@ import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel,\
  QPushButton, QVBoxLayout, QHBoxLayout, QDialog, QGroupBox, QGridLayout, QRadioButton, QLineEdit
 from PyQt5 import QtWidgets, QtCore
+import easygui
+import numpy as np
+import cv2
 
+image_name = "images/dog.bmp"
+
+# Layout 
 class Window(QWidget):
     def __init__(self, parent=None):
         super(Window, self).__init__(parent)
@@ -23,12 +29,16 @@ class Window(QWidget):
 
         bt0 = QPushButton("1.1 Load Imgae")
         bt0.setFixedSize(200,60)
+        bt0.clicked.connect(loadImage)
         bt1 = QPushButton("1.2 Color Conversion")
         bt1.setFixedSize(200,60)
+        bt1.clicked.connect(colorConversion)
         bt2 = QPushButton("1.3 Image Flipping")
+        bt2.clicked.connect(imageFlipping)
         bt2.setFixedSize(200,60)
         bt3 = QPushButton("1.4 Blending")
         bt3.setFixedSize(200,60)
+        bt3.clicked.connect(imageFlipping)
 
         vbox = QVBoxLayout()
         vbox.addWidget(bt0)
@@ -145,8 +155,43 @@ class Window(QWidget):
 
         return groupBox
 
+
+# Event
+def showImage(name, img):
+	cv2.imshow(name, img)
+	cv2.waitKey(0)
+	cv2.destroyWindow(name)
+
+def loadImage(checked):
+	global image_name
+	image_name = easygui.fileopenbox()
+	img = cv2.imread(image_name)
+	print("Height", img.shape[0])
+	print("Width", img.shape[1])
+	showImage("loadImage", img)
+
+def colorConversion(checked):
+	img = cv2.imread(image_name)
+	im_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+	showImage("colorConversion", im_rgb)
+
+def imageFlipping(checked):
+	img = cv2.imread(image_name)
+	flipVertical = cv2.flip(img, 1)
+	showImage("imageFlipping", flipVertical)
+
+def blending(checked):
+	iamge = easygui.fileopenbox()
+
+def globalThreshold(checked):
+	iamge = easygui.fileopenbox()
+
+def localThreshold(checked):
+	iamge = easygui.fileopenbox()
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     clock = Window()
     clock.show()
     sys.exit(app.exec_())
+    sys.exit()
