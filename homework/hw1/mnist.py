@@ -14,8 +14,9 @@ import numpy as np
 import cv2
 
 # Tensorflow 
-import tensorflow
-
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
 
 # Layout 
 class Window(QWidget):
@@ -43,7 +44,7 @@ class Window(QWidget):
 
         bt2 = QPushButton("5.3 Train 1 Epoch")
         bt2.setFixedSize(300,70)
-        #bt2.clicked.connect(trainOneEpoch)
+        bt2.clicked.connect(trainOneEpoch)
         
 
         bt3 = QPushButton("5.4 Show Training Result")
@@ -93,12 +94,19 @@ def hyperparameters(checked):
 	print("leraning rate: 0.001")
 	print("optimizer: SGD")
 
-
 n_classes = 10
 learning_rate = 0.001
 BATCH_SIZE = 32
 EPOCHS = 10
 
+def trainOneEpoch(checked):
+	inputs = keras.Input(shape=(784,), name='img')
+	x = layers.Dense(64, activation='relu')(inputs)
+	x = layers.Dense(64, activation='relu')(x)
+	outputs = layers.Dense(10, activation='softmax')(x)
+	
+	model = keras.Model(inputs=inputs, outputs=outputs, name='mnist_model')
+	print(model.summary())
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
