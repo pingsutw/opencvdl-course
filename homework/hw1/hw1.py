@@ -10,7 +10,13 @@ import easygui
 import numpy as np
 import cv2
 
-image_name = "images/QR.png"
+image_name = "images/OriginalTransform.png"
+# Transformation attribute
+angle = None
+Scale = None
+Tx = None
+Ty = None
+
 
 # Layout 
 class Window(QWidget):
@@ -102,9 +108,10 @@ class Window(QWidget):
         box_child.setLayout(grid_child)
 
         line0 = QLineEdit()
-        line1 = QLineEdit()
-        line2 = QLineEdit()
-        line3 = QLineEdit()
+        line0.setText("45")
+        line1 = QLineEdit("0.8")
+        line2 = QLineEdit("150")
+        line3 = QLineEdit("50")
         grid_child.addWidget(line0,0,1)
         grid_child.addWidget(line1,1,1)
         grid_child.addWidget(line2,2,1)
@@ -122,8 +129,19 @@ class Window(QWidget):
         grid_child.addWidget(l6,3,2)
         box_child.setLayout(grid_child)
 
+        def button_click(self):
+            global angle, Scale, Tx, Ty
+            angle = float(line0.text())
+            Scale = float(line1.text())
+            Tx = float(line2.text())
+            Ty = float(line3.text())
+            imageTransformation()
+
         bt0 = QPushButton("3.1 Rotation, scaling, translation")
         bt0.setFixedSize(280,60)
+        bt0.clicked.connect(button_click)
+        
+
 
         vbox_child = QVBoxLayout()
         vbox_child.addWidget(box_child)
@@ -168,7 +186,7 @@ class Window(QWidget):
 
 # Event
 def showImage(name, img):
-	plt.imshow(img)
+	plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 	plt.show()
 	# cv2.imshow(name, img)
 	# cv2.waitKey(0)
@@ -197,7 +215,7 @@ def nothing(x):
     pass
 
 def blending(checked):
-    img = cv2.imread(image_name)
+    img = cv2.imread(image_name, cv2.COLOR_BGR2RGB)
     flipVertical = cv2.flip(img, 1)
     alpha = 0.5
     cv2.namedWindow('blending')
@@ -226,8 +244,18 @@ def localThreshold(checked):
             cv2.THRESH_BINARY,19,-1)
 	showImage("localThreshold", thresh)
 
-def imageTransformation(checked):
-	img = cv2.imread(image_name)
+def imageTransformation():
+    img = cv2.imread(image_name)
+    (h, w) = img.shape[:2]
+    center = (130, 125)
+
+    rotated = cv2.getRotationMatrix2D(center, angle, Scale)
+    transform = np.float32([[1,0,Tx],[0,1,Ty]])
+
+    final = cv2.warpAffine(img, rotated, (w, h))
+    final = cv2.warpAffine(final,transform,(w, h))
+    
+    showImage("imageTransformation", final)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
