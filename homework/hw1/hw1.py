@@ -1,3 +1,7 @@
+import matplotlib
+import matplotlib.pyplot as plt
+matplotlib.get_backend()
+
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel,\
  QPushButton, QVBoxLayout, QHBoxLayout, QDialog, QGroupBox, QGridLayout, QRadioButton, QLineEdit
@@ -164,9 +168,12 @@ class Window(QWidget):
 
 # Event
 def showImage(name, img):
-	cv2.imshow(name, img)
-	cv2.waitKey(0)
-	cv2.destroyWindow(name)
+	plt.imshow(img)
+	plt.show()
+	# cv2.imshow(name, img)
+	# cv2.waitKey(0)
+	# cv2.destroyWindow(name)
+
 
 def loadImage(checked):
 	global image_name
