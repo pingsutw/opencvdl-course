@@ -214,7 +214,13 @@ def globalThreshold(checked):
     showImage("globalThreshold", thresh)
 
 def localThreshold(checked):
-	iamge = easygui.fileopenbox()
+	img = cv2.imread(image_name, cv2.CV_8UC1)
+	thresh = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
+            cv2.THRESH_BINARY,19,-1)
+	showImage("localThreshold", thresh)
+
+def imageTransformation(checked):
+	img = cv2.imread(image_name)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
