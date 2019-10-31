@@ -13,6 +13,9 @@ import easygui
 import numpy as np
 import cv2
 
+# Tensorflow 
+import tensorflow
+
 
 # Layout 
 class Window(QWidget):
@@ -36,11 +39,11 @@ class Window(QWidget):
 
         bt1 = QPushButton("5.2 Show Hyperparameters")
         bt1.setFixedSize(300,70)
-        #bt1.clicked.connect(colorConversion)
+        bt1.clicked.connect(hyperparameters)
 
         bt2 = QPushButton("5.3 Train 1 Epoch")
         bt2.setFixedSize(300,70)
-        #bt2.clicked.connect(imageFlipping)
+        #bt2.clicked.connect(trainOneEpoch)
         
 
         bt3 = QPushButton("5.4 Show Training Result")
@@ -69,6 +72,8 @@ class Window(QWidget):
 def showimages(checked):
 	# 5.1 load MINST training dataset
 	(x_train, y_train), (x_test, y_test) = mnist.load_data()
+	# image 28 * 28 
+	print("x_train.shape :", x_train.shape)
 	w=10
 	h=10
 	columns = 5
@@ -81,6 +86,18 @@ def showimages(checked):
 	    #plt.rcParams["font.family"] = "Times New Roman"
 	    #plt.rcParams["font.size"] = "20"
 	plt.show()
+
+def hyperparameters(checked):
+	print("hyperparameters:")
+	print("batch size: 32")
+	print("leraning rate: 0.001")
+	print("optimizer: SGD")
+
+
+n_classes = 10
+learning_rate = 0.001
+BATCH_SIZE = 32
+EPOCHS = 10
 
 
 if __name__ == '__main__':
