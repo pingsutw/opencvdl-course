@@ -6,7 +6,7 @@ import easygui
 import numpy as np
 import cv2
 
-image_name = "images/dog.bmp"
+image_name = "images/QR.png"
 
 # Layout 
 class Window(QWidget):
@@ -30,15 +30,18 @@ class Window(QWidget):
         bt0 = QPushButton("1.1 Load Imgae")
         bt0.setFixedSize(200,60)
         bt0.clicked.connect(loadImage)
+
         bt1 = QPushButton("1.2 Color Conversion")
         bt1.setFixedSize(200,60)
         bt1.clicked.connect(colorConversion)
+
         bt2 = QPushButton("1.3 Image Flipping")
         bt2.clicked.connect(imageFlipping)
         bt2.setFixedSize(200,60)
+
         bt3 = QPushButton("1.4 Blending")
         bt3.setFixedSize(200,60)
-        bt3.clicked.connect(imageFlipping)
+        bt3.clicked.connect(blending)
 
         vbox = QVBoxLayout()
         vbox.addWidget(bt0)
@@ -56,8 +59,11 @@ class Window(QWidget):
 
         bt0 = QPushButton("2.1 Global Threshold")
         bt0.setFixedSize(200,60)
+        bt0.clicked.connect(globalThreshold)
+
         bt1 = QPushButton("2.2 Local Threshold")
         bt1.setFixedSize(200,60)
+        bt1.clicked.connect(localThreshold)
 
         vbox = QVBoxLayout()
         vbox.addWidget(bt0,0)
@@ -180,11 +186,32 @@ def imageFlipping(checked):
 	flipVertical = cv2.flip(img, 1)
 	showImage("imageFlipping", flipVertical)
 
+def nothing(x):
+    pass
+
 def blending(checked):
-	iamge = easygui.fileopenbox()
+    img = cv2.imread(image_name)
+    flipVertical = cv2.flip(img, 1)
+    alpha = 0.5
+    cv2.namedWindow('blending')
+    cv2.createTrackbar('alpla','blending',0,255,nothing)
+    cv2.setTrackbarPos('alpla', 'blending', 255//2)
+    blend = cv2.addWeighted(img, alpha, flipVertical, 1-alpha, 0.0)
+    while(1):
+        cv2.imshow('blending', blend)
+        k = cv2.waitKey(1) & 0xFF
+        if k == 27:
+            break
+        alpha = cv2.getTrackbarPos('alpla','blending')
+        if alpha > 0:
+            alpha /= 255  
+        blend = cv2.addWeighted(img, alpha, flipVertical, 1-alpha, 0.0)
+    cv2.destroyWindow('blending') 
 
 def globalThreshold(checked):
-	iamge = easygui.fileopenbox()
+    img = cv2.imread(image_name)
+    ret, thresh = cv2.threshold(img,80,255,cv2.THRESH_BINARY)
+    showImage("globalThreshold", thresh)
 
 def localThreshold(checked):
 	iamge = easygui.fileopenbox()
