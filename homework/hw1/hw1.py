@@ -10,7 +10,7 @@ import easygui
 import numpy as np
 import cv2
 
-image_name = "images/OriginalTransform.png"
+image_name = "images/OriginalPerspective.png"
 # Transformation attribute
 angle = None
 Scale = None
@@ -151,6 +151,7 @@ class Window(QWidget):
 
         bt1 = QPushButton("3.2 persperctive Transform")
         bt1.setFixedSize(300,60)
+        bt1.clicked.connect(perspectiveTransformation)
 
         vbox = QVBoxLayout()
         vbox.addWidget(box,0)
@@ -184,15 +185,19 @@ class Window(QWidget):
         return groupBox
 
 
-# Event
 def showImage(name, img):
+	fig = plt.figure()
+	cid = fig.canvas.mpl_connect('button_press_event', onclick)
+	fig.canvas.set_window_title(name)
 	plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 	plt.show()
-	# cv2.imshow(name, img)
-	# cv2.waitKey(0)
-	# cv2.destroyWindow(name)
 
+def cvShowImage(name, img):
+	cv2.imshow(name, img)
+	cv2.waitKey(0)
+	cv2.destroyWindow(name)
 
+# Event
 def loadImage(checked):
 	global image_name
 	image_name = easygui.fileopenbox()
@@ -256,6 +261,30 @@ def imageTransformation():
     final = cv2.warpAffine(final,transform,(w, h))
     
     showImage("imageTransformation", final)
+
+points = []
+
+def onclick(event):
+    # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
+    #       ('double' if event.dblclick else 'single', event.button,
+    #        event.x, event.y, event.xdata, event.ydata))
+    global points
+    points.append([event.xdata, event.ydata])
+    if len(points) == 4:
+    	showPerspective(points)
+    	points = []
+
+def perspectiveTransformation():
+    img = cv2.imread(image_name)
+    showImage("OriginalPerspective", img)
+
+def showPerspective(points):
+	img = cv2.imread(image_name)
+	pts1 = np.float32([points[0], points[1], points[2], points[3]])
+	pts2 = np.float32([[20, 20], [450, 20], [450, 450], [20, 450]])
+	matrix = cv2.getPerspectiveTransform(pts1, pts2)
+	perspective = cv2.warpPerspective(img, matrix, (430, 430))
+	showImage("perspectiveTransformation", perspective)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
