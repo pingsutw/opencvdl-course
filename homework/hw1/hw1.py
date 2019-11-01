@@ -10,7 +10,7 @@ import easygui
 import numpy as np
 import cv2
 
-image_name = "images/OriginalPerspective.png"
+image_name = "images/School.jpg"
 # Transformation attribute
 angle = None
 Scale = None
@@ -18,7 +18,7 @@ Tx = None
 Ty = None
 
 
-# Layout 
+########################## Layout ################################
 class Window(QWidget):
     def __init__(self, parent=None):
         super(Window, self).__init__(parent)
@@ -92,19 +92,20 @@ class Window(QWidget):
         box_child = QGroupBox("Parameters")
         box_child.setFixedSize(280,190)
         grid_child = QGridLayout()
-        l0 = QLabel()
-        l0.setText("Angle:")
-        l1 = QLabel()
-        l1.setText("Scale:")
-        l2 = QLabel()
-        l2.setText("Tx")
-        l3 = QLabel()
-        l3.setText("Ty:")
 
-        grid_child.addWidget(l0,0,0)
-        grid_child.addWidget(l1,1,0)
-        grid_child.addWidget(l2,2,0)
-        grid_child.addWidget(l3,3,0)
+        label0 = QLabel()
+        label0.setText("Angle:")
+        label1 = QLabel()
+        label1.setText("Scale:")
+        label2 = QLabel()
+        label2.setText("Tx")
+        label3 = QLabel()
+        label3.setText("Ty:")
+
+        grid_child.addWidget(label0,0,0)
+        grid_child.addWidget(label1,1,0)
+        grid_child.addWidget(label2,2,0)
+        grid_child.addWidget(label3,3,0)
         box_child.setLayout(grid_child)
 
         line0 = QLineEdit()
@@ -112,21 +113,22 @@ class Window(QWidget):
         line1 = QLineEdit("0.8")
         line2 = QLineEdit("150")
         line3 = QLineEdit("50")
+
         grid_child.addWidget(line0,0,1)
         grid_child.addWidget(line1,1,1)
         grid_child.addWidget(line2,2,1)
         grid_child.addWidget(line3,3,1)
 
-        l4 = QLabel()
-        l4.setText("deg")
-        l5 = QLabel()
-        l5.setText("pixel")
-        l6 = QLabel()
-        l6.setText("pixel")
+        label4 = QLabel()
+        label4.setText("deg")
+        label5 = QLabel()
+        label5.setText("pixel")
+        label6 = QLabel()
+        label6.setText("pixel")
 
-        grid_child.addWidget(l4,0,2)
-        grid_child.addWidget(l5,2,2)
-        grid_child.addWidget(l6,3,2)
+        grid_child.addWidget(label4,0,2)
+        grid_child.addWidget(label5,2,2)
+        grid_child.addWidget(label6,3,2)
         box_child.setLayout(grid_child)
 
         def button_click(self):
@@ -141,8 +143,6 @@ class Window(QWidget):
         bt0.setFixedSize(280,60)
         bt0.clicked.connect(button_click)
         
-
-
         vbox_child = QVBoxLayout()
         vbox_child.addWidget(box_child)
         vbox_child.addWidget(bt0)
@@ -167,12 +167,19 @@ class Window(QWidget):
 
         bt0 = QPushButton("4.1 Gaussian")
         bt0.setFixedSize(200,60)
+        bt0.clicked.connect(gaussian)
+
         bt1 = QPushButton("4.2 Sobel X")
         bt1.setFixedSize(200,60)
+        bt1.clicked.connect(sobelX)
+
         bt2 = QPushButton("4.3 Sobel Y")
         bt2.setFixedSize(200,60)
+        bt2.clicked.connect(sobelY)
+
         bt3 = QPushButton("4.4 Magnitude")
         bt3.setFixedSize(200,60)
+        bt3.clicked.connect(magnitude)
 
         vbox = QVBoxLayout()
         vbox.addWidget(bt0,0)
@@ -184,20 +191,35 @@ class Window(QWidget):
 
         return groupBox
 
+########################## Event ################################
+points = []
 
 def showImage(name, img):
-	fig = plt.figure()
-	cid = fig.canvas.mpl_connect('button_press_event', onclick)
-	fig.canvas.set_window_title(name)
-	plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-	plt.show()
+    fig, ax = plt.subplots()
+
+    def onclick(event):
+        # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
+        #       ('double' if event.dblclick else 'single', event.button,
+        #        event.x, event.y, event.xdata, event.ydata))
+        circle=plt.Circle((event.xdata,event.ydata),12,color='red')
+        ax.add_patch(circle)
+        fig.canvas.draw()
+        global points
+        points.append([event.xdata, event.ydata])
+        if len(points) == 4:
+            showPerspective(points)
+            points = []
+
+    cid = fig.canvas.mpl_connect('button_press_event', onclick)
+    fig.canvas.set_window_title(name)
+    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    plt.show()
 
 def cvShowImage(name, img):
 	cv2.imshow(name, img)
 	cv2.waitKey(0)
 	cv2.destroyWindow(name)
 
-# Event
 def loadImage(checked):
 	global image_name
 	image_name = easygui.fileopenbox()
@@ -207,12 +229,15 @@ def loadImage(checked):
 	showImage("loadImage", img)
 
 def colorConversion(checked):
-	img = cv2.imread(image_name)
-	im_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-	showImage("colorConversion", im_rgb)
+    img = cv2.imread("images/color.png")
+    #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    rgb = img[...,::-1].copy()
+    gbr = rgb[...,[2,0,1]].copy()
+    rbg = gbr[...,::-1].copy()
+    showImage("colorConversion", rbg)
 
 def imageFlipping(checked):
-	img = cv2.imread(image_name)
+	img = cv2.imread("images/dog.bmp")
 	flipVertical = cv2.flip(img, 1)
 	showImage("imageFlipping", flipVertical)
 
@@ -220,7 +245,7 @@ def nothing(x):
     pass
 
 def blending(checked):
-    img = cv2.imread(image_name, cv2.COLOR_BGR2RGB)
+    img = cv2.imread("images/dog.bmp")
     flipVertical = cv2.flip(img, 1)
     alpha = 0.5
     cv2.namedWindow('blending')
@@ -239,18 +264,18 @@ def blending(checked):
     cv2.destroyWindow('blending') 
 
 def globalThreshold(checked):
-    img = cv2.imread(image_name)
+    img = cv2.imread('images/QR.png')
     ret, thresh = cv2.threshold(img,80,255,cv2.THRESH_BINARY)
     showImage("globalThreshold", thresh)
 
 def localThreshold(checked):
-	img = cv2.imread(image_name, cv2.CV_8UC1)
-	thresh = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
+    img = cv2.imread('images/QR.png', cv2.CV_8UC1)
+    thresh = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
             cv2.THRESH_BINARY,19,-1)
-	showImage("localThreshold", thresh)
+    showImage("localThreshold", thresh)
 
 def imageTransformation():
-    img = cv2.imread(image_name)
+    img = cv2.imread('images/OriginalTransform.png')
     (h, w) = img.shape[:2]
     center = (130, 125)
 
@@ -262,33 +287,124 @@ def imageTransformation():
     
     showImage("imageTransformation", final)
 
-points = []
-
-def onclick(event):
-    # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
-    #       ('double' if event.dblclick else 'single', event.button,
-    #        event.x, event.y, event.xdata, event.ydata))
-    global points
-    points.append([event.xdata, event.ydata])
-    if len(points) == 4:
-    	showPerspective(points)
-    	points = []
 
 def perspectiveTransformation():
-    img = cv2.imread(image_name)
+    img = cv2.imread('images/OriginalPerspective.png')
     showImage("OriginalPerspective", img)
 
 def showPerspective(points):
-	img = cv2.imread(image_name)
+	img = cv2.imread('images/OriginalPerspective.png')
 	pts1 = np.float32([points[0], points[1], points[2], points[3]])
 	pts2 = np.float32([[20, 20], [450, 20], [450, 450], [20, 450]])
 	matrix = cv2.getPerspectiveTransform(pts1, pts2)
 	perspective = cv2.warpPerspective(img, matrix, (430, 430))
 	showImage("perspectiveTransformation", perspective)
 
+def convolve2d(image, kernel):
+    kernel = np.flipud(np.fliplr(kernel))    
+    output = np.zeros_like(image)            
+    # Add zero padding to the input image
+    image_padded = np.zeros((image.shape[0] + 2, image.shape[1] + 2))   
+    image_padded[1:-1, 1:-1] = image
+    for x in range(image.shape[1]):     
+        for y in range(image.shape[0]):
+            output[y,x]=(kernel*image_padded[y:y+3,x:x+3]).sum()        
+    return output
+
+def gaussian(checked):
+    img = cv2.imread('images/School.jpg')
+    img = np.dot(img[...,:3], [0.1140, 0.5870, 0.2989])
+
+    plt.figure(figsize=(8,8))
+    plt.subplot(2,1,1)
+    plt.title('Grayscale')
+    plt.imshow(img, cmap = plt.get_cmap(name = 'gray'))
+
+    x, y = np.mgrid[-1:2, -1:2]
+    gaussian_kernel = np.exp(-(x**2+y**2))
+    gaussian_kernel = gaussian_kernel / gaussian_kernel.sum()
+    gaus = convolve2d(img, gaussian_kernel)
+
+    plt.subplot(2,1,2)
+    plt.title('Gaussian smoothing')
+    plt.imshow(gaus, cmap = plt.get_cmap(name = 'gray'))
+    plt.show()
+
+def sobelX(checked):
+    img = cv2.imread('images/School.jpg')
+    img = np.dot(img[...,:3], [0.1140, 0.5870, 0.2989])
+
+    x, y = np.mgrid[-1:2, -1:2]
+    gaussian_kernel = np.exp(-(x**2+y**2))
+    gaussian_kernel = gaussian_kernel / gaussian_kernel.sum()
+    img = convolve2d(img, gaussian_kernel)
+
+    plt.figure(figsize=(8,8))
+    plt.subplot(2,1,1)
+    plt.title('Gaussian smoothing')
+    plt.imshow(img, cmap = plt.get_cmap(name = 'gray'))
+
+    filterx = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]])
+    img = convolve2d(img, filterx)
+    
+    plt.subplot(2,1,2)
+    plt.title('SobelX')
+    plt.imshow(img, cmap = plt.get_cmap(name = 'gray'))
+    plt.show()
+
+def sobelY(checked):
+    img = cv2.imread('images/School.jpg')
+    img = np.dot(img[...,:3], [0.1140, 0.5870, 0.2989])
+
+    x, y = np.mgrid[-1:2, -1:2]
+    gaussian_kernel = np.exp(-(x**2+y**2))
+    gaussian_kernel = gaussian_kernel / gaussian_kernel.sum()
+    img = convolve2d(img, gaussian_kernel)
+
+    plt.figure(figsize=(8,8))
+    plt.subplot(2,1,1)
+    plt.title('Gaussian smoothing')
+    plt.imshow(img, cmap = plt.get_cmap(name = 'gray'))
+
+    filtery = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+    img = convolve2d(img, filtery)
+    
+    plt.subplot(2,1,2)
+    plt.title('SobelY')
+    plt.imshow(img, cmap = plt.get_cmap(name = 'gray'))
+    plt.show()
+
+
+def magnitude(checked):
+    img = cv2.imread('images/School.jpg')
+    img = np.dot(img[...,:3], [0.1140, 0.5870, 0.2989])
+
+    x, y = np.mgrid[-1:2, -1:2]
+    gaussian_kernel = np.exp(-(x**2+y**2))
+    gaussian_kernel = gaussian_kernel / gaussian_kernel.sum()
+    img = convolve2d(img, gaussian_kernel)
+
+    plt.figure(figsize=(8,8))
+    plt.subplot(2,1,1)
+    plt.title('Gaussian smoothing')
+    plt.imshow(img, cmap = plt.get_cmap(name = 'gray'))
+
+    filterx = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]])
+    imgx = convolve2d(img, filterx)
+
+    filtery = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+    imgy = convolve2d(img, filtery)
+
+    final = np.sqrt(np.square(imgx) + np.square(imgy))
+
+    plt.subplot(2,1,2)
+    plt.title('magnitude')
+    plt.imshow(final, cmap = plt.get_cmap(name = 'gray'))
+    plt.show()
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    clock = Window()
-    clock.show()
+    window = Window()
+    window.show()
     sys.exit(app.exec_())
     sys.exit()
