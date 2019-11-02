@@ -1,6 +1,12 @@
 # opencvdl-course
 INTRODUCTION IMAGE PROCESSING，COMPUTER VISION AND DEEP LEARNING
 
+FTP address : ftp://140.116.154.1/
+
+User : opencvdl2019
+
+Password : opencvdl2019
+
 ## Why this repo 
 The course's ftp server usually not work, and too slow.
 
