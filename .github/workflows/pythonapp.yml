@@ -22,4 +22,4 @@ jobs:
         pip install pytest
     - name: Run App
       run: |
-        python homework/hw1.py
+        python ./homework/hw1/hw1.py
