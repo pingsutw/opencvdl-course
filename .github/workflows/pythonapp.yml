@@ -17,6 +17,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         ./build_python_virtual_env.sh
+        sudo apt-get install -y python3-tk
     - name: Test with pytest
       run: |
         pip install pytest
