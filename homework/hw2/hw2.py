@@ -9,14 +9,7 @@ from PyQt5 import QtWidgets, QtCore
 import easygui
 import numpy as np
 import cv2
-
-image_name = "images/School.jpg"
-# Transformation attribute
-angle = None
-Scale = None
-Tx = None
-Ty = None
-
+import glob
 
 ########################## Layout ################################
 class Window(QWidget):
@@ -200,15 +193,51 @@ def tracking(checked):
 
 
 def ar(checked):
-    img = cv2.imread('images/1.bmp')
-    images = [img]
-    cv2.imshow('test1',img)
-    # for image in images:
-    #     cv2.imshow('test1',image)
-    #     if cv2.waitKey(500) & 0xFF == ord('q'):
-    #         break
+    # termination criteria
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
-    # cv2.destroyAllWindows()
+    # prepare object points
+    objp = np.zeros((11*8,3), np.float32)
+    objp[:,:2] = np.mgrid[0:8,0:11].T.reshape(-1,2)
+
+    # Arrays to store object points and image points from all the images.
+    objpoints = [] # 3d point in real world space
+    imgpoints = [] # 2d points in image plane.
+
+    images = glob.glob('images/*.bmp')
+
+    for fname in images:
+        print("read image")
+        img = cv2.imread(fname)
+        img = cv2.resize(img,(240,240))
+        gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+
+        # Find the chess board corners
+        ret, corners = cv2.findChessboardCorners(gray, (8,11),None)
+        # cv2.imshow('img',img)
+        # cv2.waitKey(500)
+        # If found, add object points, image points (after refining them)
+        if ret == True:
+            print("Find object points")
+            objpoints.append(objp)
+
+            corners2 = cv2.cornerSubPix(gray,corners,(11,11),(-1,-1),criteria)
+            imgpoints.append(corners2)
+
+            # Draw and display the corners
+            img = cv2.drawChessboardCorners(img, (8,11), corners2,ret)
+            cv2.imshow('img',img)
+            cv2.waitKey(1000)
+
+    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1],None,None)
+    corners2 = cv2.cornerSubPix(gray,corners,(11,11),(-1,-1),criteria)
+    _, rvecs, tvecs, inliers = cv2.solvePnPRansac(objp, corners2, mtx, dist)
+    axis = np.float32( [ [0,0,0], [0,6,0], [6,6,0], [6,0,0], [0,0,-3],[0,6,-3],[6,6,-3],[6,0,-3] ] )
+    imgpts, jac = cv2.projectPoints(axis, rvecs, tvecs, mtx, dist)
+    cv2.imshow('img',imgpts)
+    cv2.waitKey(1000)
+
+    cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
