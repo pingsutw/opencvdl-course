@@ -19,7 +19,6 @@ jobs:
         sudo apt-get install -y python3-tk
         ./build_python_virtual_env.sh
         source opencvdl/bin/activate
-        python ./homework/hw1/hw1.py
     - name: Test with pytest
       run: |
         pip install pytest
