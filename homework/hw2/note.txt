@@ -1,0 +1,5 @@
+ar 
+1. intrinsic
+2. distortion
+3. rotate 
+4. transform
