@@ -10,4 +10,6 @@ pip3 install pyqt5
 pip3 install matplotlib
 pip3 install opencv-contrib-python
 pip3 install easygui
+pip3 install deepctr
+pip3 install sklearn
 deactivate
