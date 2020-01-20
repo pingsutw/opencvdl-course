@@ -7,9 +7,6 @@ User : opencvdl2019
 
 Password : opencvdl2019
 
-## Why this repo 
-The course's ftp server usually not work, and too slow.
-
 ## This repo contains 
 * opencv and deep learning pptx
 * opencv and deep learning pdf
